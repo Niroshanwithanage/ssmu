@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Srisumana Media</title>
+<style>
+  :root{
+    --ink:#12181f;
+    --panel:#1a222c;
+    --panel-2:#212b37;
+    --line:#2c3644;
+    --accent:#8fd3f4;
+    --accent-dim:#2e5266;
+    --paper:#eee7d8;
+    --paper-dim:#9aa3ad;
+    --danger:#c65a4e;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 10%, #1c2530 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #182029 0%, transparent 50%),
+      var(--ink);
+    min-height:100vh;
+    font-family: 'Courier New', ui-monospace, monospace;
+    color:var(--paper);
+    padding:40px 20px 80px;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+  }
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    padding-bottom:18px;
+    margin-bottom:8px;
+  }
+  h1{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size:32px;
+    letter-spacing:0.5px;
+    margin:0;
+    color:var(--paper);
+    font-weight:700;
+  }
+  h1 span{ color:var(--accent); }
+  .sub{
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+  }
+  .counter{
+    font-size:12px;
+    color:var(--paper-dim);
+    letter-spacing:1px;
+  }
+  .reel-svg{
+    display:block;
+    margin:6px auto 26px;
+  }
+  .reel-svg circle.hub{ fill:var(--panel-2); stroke:var(--line); stroke-width:1.5; }
+  .reel-svg circle.spoke{ fill:var(--ink); stroke:var(--line); stroke-width:1; }
+  .reel-svg .center{ fill:var(--accent); }
+  .section-label{
+    font-size:11px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:28px 0 10px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .section-label:first-of-type{ margin-top:6px; }
+  .tracks{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .track{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    position:relative;
+    transition: border-color .2s ease;
+  }
+  .track.has-audio{ border-color:var(--accent-dim); }
+  .track.playing{ border-color:var(--accent); }
+  .track.missing{ opacity:0.55; }
+  .row1{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .idx{
+    font-size:20px;
+    font-weight:700;
+    color:var(--paper-dim);
+    width:26px;
+    flex-shrink:0;
+    font-family: Georgia, serif;
+  }
+  .track.has-audio .idx{ color:var(--accent); }
+  .meta{ flex:1; min-width:0; }
+  .track-label{
+    font-size:15px;
+    color:var(--paper);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    margin-bottom:2px;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .track-file{
+    font-size:11px;
+    color:var(--paper-dim);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-style:italic;
+  }
+  .track-time{
+    font-size:11px;
+    color:var(--paper-dim);
+    letter-spacing:0.5px;
+  }
+  .playbtn{
+    width:38px;height:38px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--paper);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    transition: background .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .playbtn:hover{ border-color:var(--accent); }
+  .playbtn:active{ transform:scale(0.94); }
+  .playbtn:disabled{ opacity:0.3; cursor:not-allowed; }
+  .playbtn svg{ width:14px; height:14px; }
+  .row2{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:12px;
+    padding-left:40px;
+  }
+  input[type=range]{
+    -webkit-appearance:none;
+    appearance:none;
+    height:3px;
+    background:var(--line);
+    border-radius:2px;
+    flex:1;
+    cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:11px;height:11px;
+    border-radius:50%;
+    background:var(--accent);
+    cursor:pointer;
+    margin-top:-4px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:11px;height:11px;
+    border:none;
+    border-radius:50%;
+    background:var(--accent);
+    cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:3px; background:var(--line); border-radius:2px;
+  }
+  .seek{ flex:1; }
+  .vol-wrap{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .vol-wrap svg{ width:13px; height:13px; opacity:0.5; }
+  .vol-wrap input[type=range]{ width:60px; }
+  footer{
+    margin-top:32px;
+    text-align:center;
+    font-size:10px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+  }
+  @media (max-width:480px){
+    .row2{ padding-left:0; flex-wrap:wrap; }
+    .vol-wrap{ order:3; width:100%; padding-left:36px; }
+    h1{ font-size:26px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Srisumana <span>Media</span></h1>
+      <div class="sub">ශ්‍රීසුමන දහම් පාසල් හඬ පද්ධතිය</div>
+    </div>
+    <div class="counter" id="counter">0 / 13 loaded</div>
+  </header>
+
+  <svg class="reel-svg" width="90" height="90" viewBox="0 0 90 90">
+    <circle class="hub" cx="45" cy="45" r="40"/>
+    <circle class="spoke" cx="45" cy="18" r="7"/>
+    <circle class="spoke" cx="68" cy="58" r="7"/>
+    <circle class="spoke" cx="22" cy="58" r="7"/>
+    <circle class="center" cx="45" cy="45" r="6"/>
+  </svg>
+
+  <div id="content"></div>
+
+  <footer>Srisumana Media — audio folder එකෙන්</footer>
+</div>
+
+<script>
+/* ============================================================
+   AUDIO FILE PATHS — මෙතනට ඔයාගේ file path ටික දාන්න
+   ------------------------------------------------------------
+   මේ html file එක තියෙන folder එකේම "audio" කියලා folder
+   එකක් හදලා, ඒ ඇතුලට file ටික මෙහෙම දාන්න:
+
+   your-project-folder/
+     audio-player.html   <-- මේ file එක
+     audio/
+       bell-01.mp3
+       bell-02.mp3
+       bell-03.mp3
+       bell-04.mp3
+       bell-05.mp3
+       bell-06.mp3
+       bell-07.mp3
+       bell-08.mp3
+       dhamma-school-song.mp3
+       srisumana-song.mp3
+       national-anthem.mp3
+       end-song.mp3
+       environment-song.mp3
+
+   file නම ඕන විදිහට වෙනස් කරන්න පුලුවන් — විතරක් පහල src:
+   value එකත් ඒ නමටම ගැලපෙන්න වෙනස් කරන්න.
+   file එකක් තාම නැත්නම් src: '' විදිහට හිස්ව තියන්න,
+   එතකොට ඒ track එක "audio නෑ" කියලා පෙන්නලා disable වෙනවා.
+   ============================================================ */
+const TRACKS = [
+  { id:'bell-1', label:'ආරම්බය', section:'බෙල්', src:'audio/start bell.mp3' },
+  { id:'bell-2', label:'පලවෙනි ', section:'බෙල්', src:'audio/first bell.mp3' },
+  { id:'bell-3', label:'දෙවෙනි', section:'බෙල්', src:'audio/second bell.mp3' },
+  { id:'bell-4', label:'විවේකය', section:'බෙල්', src:'audio/lunch time bell.mp3' },
+  { id:'bell-5', label:'තුන්වන', section:'බෙල්', src:'audio/third bell.mp3' },
+  { id:'bell-6', label:'හතරවන', section:'බෙල්', src:'audio/forth bell.mp3' },
+  { id:'bell-7', label:'අවසානයට පෙර', section:'බෙල්', src:'audio/end before bell.mp3' },
+  { id:'bell-8', label:'අවසානය', section:'බෙල්', src:'audio/end bell.mp3' },
+  { id:'song-dhamma',      label:'දහම් පාසල් ගීතය',            section:'ගීත', src:'audio/dahampasal song.mp3' },
+  { id:'song-srisumana',   label:'ශ්‍රීසුමන දහම්පාසල් ගීතය',   section:'ගීත', src:'audio/srisumana song.mp3' },
+  { id:'song-national',    label:'ජාතික ගීතය',                 section:'ගීත', src:'audio/national song.mp3' },
+  { id:'song-end',         label:' පරිසර ගීතය',                 section:'ගීත', src:'audio/parisara geethaya.mp3' },
+  { id:'song-environment', label:'NEWS',                 section:'ගීත', src:'audio/news.mp3' },
+];
+/* ============================================================ */
+
+const state = TRACKS.map(() => ({ audio: null, playing: false, loaded: false, missing: false }));
+
+const contentEl = document.getElementById('content');
+const counterEl = document.getElementById('counter');
+
+function fmtTime(s){
+  if(!isFinite(s) || s == null) return '0:00';
+  const m = Math.floor(s/60);
+  const sec = Math.floor(s%60).toString().padStart(2,'0');
+  return `${m}:${sec}`;
+}
+
+function updateCounter(){
+  const n = state.filter(t => t.loaded).length;
+  counterEl.textContent = `${n} / ${TRACKS.length} loaded`;
+}
+
+function pauseAllExcept(i){
+  state.forEach((t, idx) => {
+    if(idx !== i && t.audio && t.playing){
+      t.audio.pause();
+      t.playing = false;
+      render(idx);
+    }
+  });
+}
+
+function render(i){
+  const t = state[i];
+  const el = document.getElementById('track-' + i);
+  if(!el) return;
+
+  el.classList.toggle('has-audio', !!t.loaded);
+  el.classList.toggle('playing', !!t.playing);
+  el.classList.toggle('missing', !!t.missing);
+
+  const fileEl = el.querySelector('.track-file');
+  const timeEl = el.querySelector('.track-time');
+  const playBtn = el.querySelector('.playbtn');
+  const seek = el.querySelector('.seek');
+
+  playBtn.disabled = !t.loaded;
+
+  if(t.missing){
+    fileEl.textContent = 'audio නෑ (src path එක check කරන්න)';
+  } else if(!TRACKS[i].src){
+    fileEl.textContent = 'audio නෑ (src හිස්ව තියෙනවා)';
+  } else if(t.loaded){
+    fileEl.textContent = TRACKS[i].src;
+  } else {
+    fileEl.textContent = 'load වෙමින්...';
+  }
+
+  if(t.audio && t.loaded){
+    const cur = fmtTime(t.audio.currentTime);
+    const dur = fmtTime(t.audio.duration);
+    timeEl.textContent = `${cur} / ${dur}`;
+    seek.max = isFinite(t.audio.duration) ? t.audio.duration : 0;
+    seek.value = t.audio.currentTime || 0;
+  } else {
+    timeEl.textContent = '';
+    seek.value = 0;
+    seek.max = 0;
+  }
+
+  playBtn.innerHTML = t.playing
+    ? `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="5" height="16"/><rect x="14" y="4" width="5" height="16"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg>`;
+}
+
+function buildTrackRow(container, i, sectionIdx){
+  const track = TRACKS[i];
+  const div = document.createElement('div');
+  div.className = 'track';
+  div.id = 'track-' + i;
+  div.innerHTML = `
+    <div class="row1">
+      <div class="idx">${String(sectionIdx).padStart(2,'0')}</div>
+      <button class="playbtn" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg>
+      </button>
+      <div class="meta">
+        <div class="track-label">${track.label}</div>
+        <div class="track-file">load වෙමින්...</div>
+        <div class="track-time"></div>
+      </div>
+    </div>
+    <div class="row2">
+      <input type="range" class="seek" min="0" max="0" step="0.1" value="0">
+      <div class="vol-wrap">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>
+        <input type="range" class="vol" min="0" max="1" step="0.01" value="1">
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+
+  const playBtn = div.querySelector('.playbtn');
+  const seek = div.querySelector('.seek');
+  const vol = div.querySelector('.vol');
+
+  playBtn.addEventListener('click', () => {
+    const t = state[i];
+    if(!t.loaded) return;
+    if(t.playing){
+      t.audio.pause();
+      t.playing = false;
+    } else {
+      pauseAllExcept(i);
+      t.audio.play();
+      t.playing = true;
+    }
+    render(i);
+  });
+
+  seek.addEventListener('input', () => {
+    const t = state[i];
+    if(t.audio) t.audio.currentTime = parseFloat(seek.value);
+  });
+
+  vol.addEventListener('input', () => {
+    const t = state[i];
+    if(t.audio) t.audio.volume = parseFloat(vol.value);
+  });
+}
+
+function initTrack(i){
+  const track = TRACKS[i];
+  const t = state[i];
+  if(!track.src){
+    render(i);
+    return;
+  }
+
+  const audio = new Audio(track.src);
+  audio.preload = 'metadata';
+  t.audio = audio;
+
+  audio.addEventListener('loadedmetadata', () => {
+    t.loaded = true;
+    render(i);
+    updateCounter();
+  });
+  audio.addEventListener('timeupdate', () => render(i));
+  audio.addEventListener('ended', () => {
+    t.playing = false;
+    audio.currentTime = 0;
+    render(i);
+  });
+  audio.addEventListener('error', () => {
+    t.missing = true;
+    t.loaded = false;
+    render(i);
+    updateCounter();
+  });
+
+  render(i);
+}
+
+let currentSection = null;
+let sectionCounter = 0;
+let sectionWrap = null;
+
+TRACKS.forEach((track, i) => {
+  if(track.section !== currentSection){
+    currentSection = track.section;
+    sectionCounter = 0;
+    const heading = document.createElement('div');
+    heading.className = 'section-label';
+    heading.textContent = currentSection;
+    contentEl.appendChild(heading);
+    sectionWrap = document.createElement('div');
+    sectionWrap.className = 'tracks';
+    contentEl.appendChild(sectionWrap);
+  }
+  sectionCounter++;
+  buildTrackRow(sectionWrap, i, sectionCounter);
+});
+
+TRACKS.forEach((track, i) => initTrack(i));
+updateCounter();
+</script>
+</body>
+</html>
